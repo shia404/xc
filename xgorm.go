@@ -57,9 +57,9 @@ func GormDbErr(err error) error {
 }
 
 // 生成模型
-func GormGeneratorModel(c GormConfig) {
+func GormGeneratorModel(c GormConfig, outPath string) {
 	g := gen.NewGenerator(gen.Config{
-		OutPath: "dao/query",
+		OutPath: outPath,
 		Mode:    gen.WithDefaultQuery | gen.WithQueryInterface,
 	})
 	dsn := c.Dsn
