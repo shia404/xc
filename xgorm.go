@@ -3,6 +3,7 @@ package xc
 import (
 	"errors"
 	"gorm.io/driver/mysql"
+	"gorm.io/gen"
 	"gorm.io/gorm"
 	"gorm.io/plugin/dbresolver"
 )
@@ -53,4 +54,22 @@ func GormDbErr(err error) error {
 		return err
 	}
 	return nil
+}
+
+// 生成模型
+func GormGeneratorModel(c GormConfig) {
+	g := gen.NewGenerator(gen.Config{
+		OutPath: "dao/query",
+		Mode:    gen.WithDefaultQuery | gen.WithQueryInterface,
+	})
+	dsn := c.Dsn
+	gormDb, _ := gorm.Open(mysql.Open(dsn))
+	g.UseDB(gormDb)
+	g.WithDataTypeMap(map[string]func(gorm.ColumnType) (dataType string){
+		"decimal": func(columnType gorm.ColumnType) (dataType string) {
+			return "decimal.Decimal"
+		},
+	})
+	g.ApplyBasic(g.GenerateAllTable()...)
+	g.Execute()
 }
