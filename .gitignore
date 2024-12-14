@@ -1,0 +1,8 @@
+.idea
+**/runtime/
+**/build/
+**/data/
+**/logs/
+**/log/
+**/tmp/
+**/vendor/
