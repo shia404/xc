@@ -1,4 +1,4 @@
-package xc
+package pkg
 
 import (
 	"errors"
@@ -13,20 +13,21 @@ type GormConfig struct {
 	DsnReplicas []string `json:"DsnReplicas,optional"`
 }
 
-func GormNewClient(c GormConfig) *gorm.DB {
-	db, err := gorm.Open(mysql.Open(c.Dsn), &gorm.Config{})
+// NewClient 新建客户端
+func (x *GormConfig) NewClient() *gorm.DB {
+	db, err := gorm.Open(mysql.Open(x.Dsn), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
 
 	// 判断是否集群
-	if len(c.DsnReplicas) > 0 {
+	if len(x.DsnReplicas) > 0 {
 		var replicas []gorm.Dialector
-		for _, replica := range c.DsnReplicas {
+		for _, replica := range x.DsnReplicas {
 			replicas = append(replicas, mysql.Open(replica))
 		}
 		err = db.Use(dbresolver.Register(dbresolver.Config{
-			Sources:           []gorm.Dialector{mysql.Open(c.Dsn)},
+			Sources:           []gorm.Dialector{mysql.Open(x.Dsn)},
 			Replicas:          replicas,
 			Policy:            dbresolver.RandomPolicy{},
 			TraceResolverMode: true,
@@ -56,8 +57,8 @@ func GormDbErr(err error) error {
 	return nil
 }
 
-// 生成模型
-func GormGeneratorModel(c GormConfig, outPath string) {
+// GormGeneratorModel 生成模型
+func (x *GormConfig) GormGeneratorModel(c GormConfig, outPath string) {
 	g := gen.NewGenerator(gen.Config{
 		OutPath: outPath,
 		Mode:    gen.WithDefaultQuery | gen.WithQueryInterface,
